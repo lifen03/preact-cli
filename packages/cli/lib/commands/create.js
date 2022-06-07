@@ -28,54 +28,12 @@ const {
 	FALLBACK_TEMPLATE_OPTIONS,
 } = require('../constants');
 const { addScripts, install, initGit } = require('../lib/setup');
-const { validateArgs } = require('./validate-args');
 
 const ORG = 'preactjs-templates';
-const RGX = /\.(woff2?|ttf|eot|jpe?g|ico|png|gif|webp|mp4|mov|ogg|webm)(\?.*)?$/i;
+const RGX =
+	/\.(woff2?|ttf|eot|jpe?g|ico|png|gif|webp|mp4|mov|ogg|webm)(\?.*)?$/i;
 const isMedia = str => RGX.test(str);
 const capitalize = str => str.charAt(0).toUpperCase() + str.substring(1);
-
-const options = [
-	{
-		name: '--name',
-		description: 'The application name',
-	},
-	{
-		name: '--cwd',
-		description: 'A directory to use instead of $PWD',
-		default: '.',
-	},
-	{
-		name: '--force',
-		description: 'Force destination output; will override!',
-		default: false,
-	},
-	{
-		name: '--install',
-		description: 'Install dependencies',
-		default: true,
-	},
-	{
-		name: '--yarn',
-		description: 'Use `yarn` instead of `npm`',
-		default: false,
-	},
-	{
-		name: '--git',
-		description: 'Initialize git repository',
-		default: false,
-	},
-	{
-		name: '--license',
-		description: 'License type',
-		default: 'MIT',
-	},
-	{
-		name: '-v, --verbose',
-		description: 'Verbose output',
-		default: false,
-	},
-];
 
 // Formulate Questions if `create` args are missing
 function requestParams(repo, dest, argv, templates) {
@@ -176,11 +134,7 @@ async function fetchTemplates() {
 		// If cache file doesn't exist, then hit the API and fetch the data
 		if (!existsSync(cacheFilePath)) {
 			const repos = await fetch(TEMPLATES_REPO_URL).then(r => r.json());
-			await writeFile(
-				cacheFilePath,
-				JSON.stringify(repos, null, 2),
-				'utf-8'
-			);
+			await writeFile(cacheFilePath, JSON.stringify(repos, null, 2), 'utf-8');
 		}
 
 		// update the cache file without blocking the rest of the tasks.
@@ -206,8 +160,7 @@ async function copyFileToDestination(srcPath, destPath, force = false) {
 	}
 }
 
-async function command(repo, dest, argv) {
-	validateArgs(argv, options, 'create');
+exports.create = async function createCommand(repo, dest, argv) {
 	// Prompt if incomplete data
 	if (!repo || !dest) {
 		const templates = await fetchTemplates();
@@ -430,9 +383,4 @@ async function command(repo, dest, argv) {
 		  ${green(pfx + ' serve')}
 	`) + '\n\n'
 	);
-}
-
-module.exports = {
-	command,
-	options,
 };

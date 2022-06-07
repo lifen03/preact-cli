@@ -85,12 +85,14 @@ describe('preact build', () => {
 
 		// The tsconfig.json in the template covers the test directory,
 		// so TS will error out if it can't find even test-only module definitions
+		const oldCwd = process.cwd();
 		shell.cd(dir);
 		//shell.exec('npm i @types/enzyme@3.10.11 enzyme-adapter-preact-pure');
 		// Remove when https://github.com/preactjs/enzyme-adapter-preact-pure/issues/161 is resolved
 		shell.exec('rm tsconfig.json');
 
 		await expect(build(dir)).resolves.not.toThrow();
+		shell.cd(oldCwd);
 	});
 
 	it('should patch global location object', async () => {
@@ -358,14 +360,15 @@ describe('preact build', () => {
 		});
 
 		it('--invalid-arg', async () => {
-			let dir = await subject('minimal');
-			// @ts-ignore
-			const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {});
-			await expect(build(dir, { 'invalid-arg': false })).rejects.toEqual(
-				new Error('Invalid argument found.')
+			// Invalid arguments are caught by sade and it operates over process.argv,
+			// necessitating this (or a similar) approach.
+			const { code, stderr } = shell.exec(
+				`node ${join(process.cwd(), 'lib/index.js')} build --invalid-arg`
 			);
-			expect(mockExit).toHaveBeenCalledWith(1);
-			mockExit.mockRestore();
+			expect(stderr).toMatch(
+				"Invalid argument '--invalid-arg' passed to build."
+			);
+			expect(code).toBe(1);
 		});
 	});
 

@@ -358,10 +358,8 @@ describe('preact build', () => {
 		});
 
 		it('--invalid-arg', async () => {
-			// Invalid arguments are caught by sade and it operates over process.argv,
-			// necessitating this (or a similar) approach.
 			const { code, stderr } = shell.exec(
-				`node ${join(process.cwd(), 'lib/index.js')} build --invalid-arg`
+				`node ${join(__dirname, '../lib/index.js')} build --invalid-arg`
 			);
 			expect(stderr).toMatch(
 				"Invalid argument '--invalid-arg' passed to build."

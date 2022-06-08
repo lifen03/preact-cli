@@ -1,19 +1,9 @@
 const { join } = require('path');
-const { mkdir, symlink } = require('fs').promises;
+const { mkdir } = require('fs').promises;
+const shell = require('shelljs');
 const cmd = require('../../lib/commands');
 const { tmpDir } = require('./output');
-const shell = require('shelljs');
-
-const root = join(__dirname, '../../../..');
-
-async function linkPackage(name, from, to) {
-	try {
-		await symlink(
-			join(from, 'node_modules', name),
-			join(to, 'node_modules', name)
-		);
-	} catch {}
-}
+const { linkPackage } = require('./utils');
 
 const argv = {
 	_: [],
@@ -36,11 +26,10 @@ exports.create = async function (template, name) {
 exports.build = async function (cwd, options, installNodeModules = false) {
 	if (!installNodeModules) {
 		await mkdir(join(cwd, 'node_modules'), { recursive: true }); // ensure exists, avoid exit()
-		await linkPackage('preact', root, cwd);
-		await linkPackage('preact-render-to-string', root, cwd);
+		await linkPackage('preact', cwd);
+		await linkPackage('preact-render-to-string', cwd);
 	} else {
-		shell.cd(cwd);
-		shell.exec('npm i');
+		shell.exec(`npm --prefix ${cwd} i`);
 	}
 
 	let opts = Object.assign({}, { cwd }, argv, options);

@@ -166,8 +166,7 @@ exports.create = async function createCommand(repo, dest, argv) {
 		const templates = await fetchTemplates();
 		const questions = requestParams(repo, dest, argv, templates);
 		const onCancel = () => {
-			info('Aborting execution');
-			process.exit();
+			info('Aborting execution', 0);
 		};
 		const response = await prompt(questions, { onCancel });
 

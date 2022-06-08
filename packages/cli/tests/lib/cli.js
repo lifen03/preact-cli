@@ -14,11 +14,11 @@ const argv = {
 	'inline-css': true,
 };
 
-exports.create = async function (template, name) {
+exports.create = async function (template, options) {
 	let dest = await tmpDir();
-	name = name || `test-${template}`;
 
-	await cmd.create(template, dest, { name, cwd: '.' });
+	let opts = Object.assign({ name: `test-${template}`, cwd: '.' }, options);
+	await cmd.create(template, dest, opts);
 
 	return dest;
 };
@@ -32,7 +32,7 @@ exports.build = async function (cwd, options, installNodeModules = false) {
 		shell.exec(`npm --prefix ${cwd} i`);
 	}
 
-	let opts = Object.assign({}, { cwd }, argv, options);
+	let opts = Object.assign({ cwd }, argv, options);
 	return await cmd.build(opts.src, opts);
 };
 

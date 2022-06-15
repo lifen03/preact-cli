@@ -5,15 +5,6 @@ const cmd = require('../../lib/commands');
 const { tmpDir } = require('./output');
 const { linkPackage } = require('./utils');
 
-const argv = {
-	_: [],
-	src: 'src',
-	dest: 'build',
-	config: 'preact.config.js',
-	prerenderUrls: 'prerender-urls.json',
-	'inline-css': true,
-};
-
 exports.create = async function (template, options) {
 	let dest = await tmpDir();
 
@@ -24,6 +15,14 @@ exports.create = async function (template, options) {
 };
 
 exports.build = async function (cwd, options, installNodeModules = false) {
+	const argv = {
+		src: 'src',
+		dest: 'build',
+		config: 'preact.config.js',
+		prerenderUrls: 'prerender-urls.json',
+		'inline-css': true,
+	};
+
 	if (!installNodeModules) {
 		await mkdir(join(cwd, 'node_modules'), { recursive: true }); // ensure exists, avoid exit()
 		await linkPackage('preact', cwd);
@@ -36,10 +35,15 @@ exports.build = async function (cwd, options, installNodeModules = false) {
 	return await cmd.build(opts.src, opts);
 };
 
-exports.watch = function (cwd, port, host = '127.0.0.1') {
-	const args = { ...argv };
-	delete args.dest;
-	delete args['inline-css'];
-	let opts = Object.assign({ cwd, host, port, https: false }, args);
-	return cmd.watch(argv.src, opts);
+exports.watch = function (cwd, options) {
+	const argv = {
+		src: 'src',
+		host: '127.0.0.1',
+		https: false,
+		config: 'preact.config.js',
+		prerenderUrls: 'prerender-urls.json',
+	};
+
+	let opts = Object.assign({ cwd }, argv, options);
+	return cmd.watch(opts.src, opts);
 };

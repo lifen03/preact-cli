@@ -18,8 +18,12 @@ function read(path) {
 	return readFileSync(resolve(__dirname, path), 'utf-8');
 }
 
-module.exports = async function renderHTMLPlugin(config) {
+/**
+ * @param {import('../../../types').Env} env
+ */
+module.exports = async function renderHTMLPlugin(config, env) {
 	const { cwd, dest, src } = config;
+
 	const inProjectTemplatePath = resolve(src, 'template.html');
 	let template = defaultTemplate;
 	if (existsSync(inProjectTemplatePath)) {
@@ -87,7 +91,7 @@ module.exports = async function renderHTMLPlugin(config) {
 					: createLoadManifest(
 							compilation.assets,
 							compilation.namedChunkGroups,
-							config.isProd
+							env.isProd
 					  );
 
 				return {
@@ -98,6 +102,7 @@ module.exports = async function renderHTMLPlugin(config) {
 						inlineCss: config['inline-css'],
 						preload: config.preload,
 						config,
+						env,
 						preRenderData: values,
 						CLI_DATA: { preRenderData: { url, ...routeData } },
 						ssr: config.prerender ? prerender({ cwd, dest, src }, values) : '',

@@ -1,9 +1,9 @@
-const { join } = require('path');
+const { join, relative } = require('path');
 const { access, mkdir, readdir, readFile, rename, unlink, writeFile } =
 	require('fs').promises;
 const looksLike = require('html-looks-like');
 const { create, build, buildFast } = require('./lib/cli');
-const { snapshot } = require('./lib/utils');
+const { expand, snapshot } = require('./lib/utils');
 const { subject } = require('./lib/output');
 const images = require('./images/build');
 const minimatch = require('minimatch');
@@ -82,6 +82,26 @@ describe('preact build', () => {
 		shell.exec('rm tsconfig.json');
 
 		await expect(buildFast(dir)).resolves.not.toThrow();
+	});
+
+	it.only('lazy loads routes with preact-iso `lazy`', async () => {
+		let dir = await subject('lazy-load-iso');
+		await buildFast(dir, { prerender: false });
+
+		let output = await expand(join(dir, 'build')).then(arr => {
+			return arr.map(x => relative(dir, x));
+		});
+
+		let expected = [
+			/build\/a\.chunk\.\w{5}\.js$/,
+			/build\/a\.chunk\.\w{5}\.css$/,
+			/build\/b\.chunk\.\w{5}\.js$/,
+			/build\/b\.chunk\.\w{5}\.css$/,
+		];
+
+		expected.forEach(pattern => {
+			expect(output.find(file => pattern.test(file))).not.toBeUndefined();
+		});
 	});
 
 	it('should patch global location object', async () => {

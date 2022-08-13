@@ -292,9 +292,12 @@ module.exports = function createBaseConfig(env) {
 			new MiniCssExtractPlugin({
 				filename:
 					isProd && !env.isServer ? '[name].[contenthash:5].css' : '[name].css',
-				chunkFilename: isProd
-					? '[name].chunk.[contenthash:5].css'
-					: '[name].chunk.css',
+				chunkFilename: pathData => {
+					const chunkName = pathData.chunk.id.split('_').slice(0, -1).join('-');
+					return isProd
+						? `${chunkName}.chunk.[chunkhash:5].css`
+						: `${chunkName}.chunk.css`;
+				},
 			}),
 			ProgressBarPlugin({
 				format:

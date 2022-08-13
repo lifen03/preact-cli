@@ -88,7 +88,12 @@ async function clientConfig(env) {
 				}
 				return env.isProd ? '[name].[chunkhash:5].js' : '[name].js';
 			},
-			chunkFilename: '[name].chunk.[chunkhash:5].js',
+			chunkFilename: pathData => {
+				const chunkName = pathData.chunk.id.split('_').slice(0, -1).join('-');
+				return env.isProd
+					? `${chunkName}.chunk.[chunkhash:5].js`
+					: `${chunkName}.chunk.js`;
+			},
 		},
 
 		resolveLoader: {
@@ -173,6 +178,7 @@ function isProd(env) {
 		cache: true,
 
 		optimization: {
+			chunkIds: 'named',
 			minimizer: [
 				new TerserPlugin({
 					extractComments: false,
